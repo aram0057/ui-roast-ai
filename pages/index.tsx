@@ -1,18 +1,25 @@
 import { useState, FormEvent } from "react";
 
+type Judge = "gordon" | "grandma" | "ipad_kid";
+
 export default function Home() {
   const [roast, setRoast] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
+  const [judge, setJudge] = useState<Judge | null>(null);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
+    if (!judge) {
+      alert("Pick a judge first!");
+      return;
+    }
     setLoading(true);
 
     try {
       const res = await fetch("/api/roast", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({}),
+        body: JSON.stringify({ judge }), // send chosen judge
       });
 
       const data = await res.json();
@@ -32,17 +39,65 @@ export default function Home() {
           🔥 UI Roast AI 🤬
         </h1>
         <p className="mb-6 text-center max-w-md text-gray-300">
-          Upload your UI screenshot (or just click below) and get roasted by AI
-          Gordon Ramsay. Brutal. Funny. Honest.
+          Choose your judge and get roasted! Brutal, funny, and painfully honest.
         </p>
 
+        {/* Judge Selection */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6 w-full">
+          <button
+            type="button"
+            onClick={() => setJudge("gordon")}
+            className={`p-4 rounded-xl border-2 text-white transition ${
+              judge === "gordon"
+                ? "border-red-500 bg-red-600"
+                : "border-gray-500 bg-gray-700 hover:bg-gray-600"
+            }`}
+          >
+            🍳 Gordon Ramsay
+            <p className="text-xs mt-1 text-gray-300">
+              Brutal food-style roasts
+            </p>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setJudge("grandma")}
+            className={`p-4 rounded-xl border-2 text-white transition ${
+              judge === "grandma"
+                ? "border-pink-400 bg-pink-500"
+                : "border-gray-500 bg-gray-700 hover:bg-gray-600"
+            }`}
+          >
+            👵 Grandma
+            <p className="text-xs mt-1 text-gray-300">
+              Simplicity over everything
+            </p>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setJudge("ipad_kid")}
+            className={`p-4 rounded-xl border-2 text-white transition ${
+              judge === "ipad_kid"
+                ? "border-yellow-400 bg-yellow-500"
+                : "border-gray-500 bg-gray-700 hover:bg-gray-600"
+            }`}
+          >
+            📱 iPad Kid
+            <p className="text-xs mt-1 text-gray-300">
+              Fast, flashy, short attention
+            </p>
+          </button>
+        </div>
+
+        {/* Roast Form */}
         <form
           onSubmit={handleSubmit}
           className="flex flex-col items-center gap-4 w-full"
         >
           <button
             type="submit"
-            className={`bg-red-600 text-white px-6 py-3 rounded-xl hover:bg-red-700 transition-colors w-full text-lg font-semibold ${
+            className={`bg-blue-600 text-white px-6 py-3 rounded-xl hover:bg-blue-700 transition-colors w-full text-lg font-semibold ${
               loading ? "opacity-50 cursor-not-allowed" : ""
             }`}
             disabled={loading}
