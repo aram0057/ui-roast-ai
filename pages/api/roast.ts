@@ -1,49 +1,46 @@
-// pages/api/roast.ts
-import { NextApiRequest, NextApiResponse } from "next";
-import OpenAI from "openai";
+import { IncomingForm, File } from "formidable";
+import type { NextApiRequest, NextApiResponse } from "next";
 
-const client = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY!,
-});
-
-// Helper to generate prompt based on judge
-function getJudgePrompt(judge: string, fileName: string) {
-  switch (judge) {
-    case "gordon":
-      return `You are Gordon Ramsay. Roast this UI design screenshot (${fileName}). Be brutally funny and sarcastic, then give exactly 3 clear actionable tips. Number them.`;
-    case "grandma":
-      return `You are a grandma who dislikes complicated tech. Critique this UI screenshot (${fileName}) humorously for simplicity, readability, and usability. Then give exactly 3 actionable tips to make it simpler. Number them.`;
-    case "ipad_kid":
-      return `You are an impatient iPad kid. Check this UI screenshot (${fileName}). Comment sarcastically on confusing or boring parts, then give exactly 3 concise actionable tips to make it flashy and engaging. Number them.`;
-    default:
-      return `Roast this UI screenshot (${fileName}) and provide exactly 3 actionable tips. Number them.`;
-  }
-}
+export const config = {
+  api: { bodyParser: false },
+};
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
+  if (req.method !== "POST") {
+    return res.status(405).json({ error: "Method not allowed" });
+  }
 
-  try {
-    const { judge, file } = req.body;
+  const form = new IncomingForm();
 
-    if (!file) {
-      return res.status(400).json({ error: "No file uploaded" });
+  form.parse(req, (err, fields, files) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).json({ error: "Error parsing form" });
     }
 
-    const prompt = getJudgePrompt(judge || "gordon", file);
+    const judgeField = fields.judge;
+    const judge = Array.isArray(judgeField) ? judgeField[0] : judgeField || "gordon";
 
-    // Call OpenAI Chat API
-    const response = await client.chat.completions.create({
-      model: "gpt-4o",
-      messages: [{ role: "user", content: prompt }],
-    });
+    const uploadedFile = Array.isArray(files.file) ? files.file[0] : files.file;
 
-    // Safely extract text
-    const roastText = response.choices?.[0]?.message?.content || "No roast generated";
+    console.log("Received judge:", judge);
+    console.log("Received file:", uploadedFile?.originalFilename);
+
+    let roastText = "";
+    switch (judge) {
+      case "gordon":
+        roastText = "🍳 Gordon says: This UI looks like a burnt toast! 3 tips: 1. Improve contrast. 2. Reduce clutter. 3. Use proper spacing.";
+        break;
+      case "grandma":
+        roastText = "👵 Grandma says: Too complicated! 3 tips: 1. Bigger buttons. 2. Simplify menus. 3. Clear fonts.";
+        break;
+      case "ipad_kid":
+        roastText = "📱 iPad Kid says: Boring! 3 tips: 1. Add animations. 2. Make colors pop. 3. Shorter text.";
+        break;
+      default:
+        roastText = "Here's a generic roast: Fix your UI! 3 tips: 1. Color. 2. Layout. 3. Usability.";
+    }
 
     return res.status(200).json({ roast: roastText });
-  } catch (err) {
-    console.error("AI roast error:", err);
-    return res.status(500).json({ error: "Failed to generate roast" });
-  }
+  });
 }
