@@ -1,29 +1,33 @@
+"use client";
+
 import { useState, FormEvent } from "react";
 
 type Judge = "gordon" | "grandma" | "ipad_kid";
 
 export default function Home() {
+  const [judge, setJudge] = useState<Judge | null>(null);
+  const [file, setFile] = useState<File | null>(null);
+  const [preview, setPreview] = useState<string | null>(null);
   const [roast, setRoast] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
-  const [judge, setJudge] = useState<Judge | null>(null);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if (!judge) {
-      alert("Pick a judge first!");
-      return;
-    }
-    setLoading(true);
+    if (!judge || !file) return;
 
+    setLoading(true);
     try {
+      const formData = new FormData();
+      formData.append("judge", judge);
+      formData.append("file", file);
+
       const res = await fetch("/api/roast", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ judge }), // send chosen judge
+        body: formData,
       });
 
       const data = await res.json();
-      setRoast(data.roast);
+      setRoast(data.roast || data.feedback);
     } catch (err) {
       console.error(err);
       setRoast("Something went wrong. Try again later.");
@@ -39,11 +43,52 @@ export default function Home() {
           🔥 UI Roast AI 🤬
         </h1>
         <p className="mb-6 text-center max-w-md text-gray-300">
-          Choose your judge and get roasted! Brutal, funny, and painfully honest.
+          Upload your UI screenshot first, then pick a judge to roast it!
         </p>
 
+        {/* File Upload */}
+        <label className="w-full mb-4 flex flex-col items-center cursor-pointer bg-gray-700 hover:bg-gray-600 px-6 py-4 rounded-xl transition">
+          <span className="text-gray-300 mb-2">Click to upload your screenshot</span>
+          <input
+            type="file"
+            accept="image/*"
+            onChange={(e) => {
+              const selectedFile = e.target.files?.[0] || null;
+              setFile(selectedFile);
+              if (selectedFile) {
+                const reader = new FileReader();
+                reader.onload = () => setPreview(reader.result as string);
+                reader.readAsDataURL(selectedFile);
+              } else {
+                setPreview(null);
+              }
+            }}
+            className="hidden"
+          />
+          {file && (
+            <span className="text-green-400 font-semibold mt-2">
+              ✅ {file.name} uploaded successfully
+            </span>
+          )}
+        </label>
+
+        {/* Image Preview */}
+        {preview && (
+          <div className="mb-6 w-full flex justify-center">
+            <img
+              src={preview}
+              alt="Uploaded screenshot preview"
+              className="max-h-60 rounded-xl border-2 border-gray-600"
+            />
+          </div>
+        )}
+
         {/* Judge Selection */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6 w-full">
+        <div
+          className={`grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6 w-full ${
+            !file ? "opacity-50 pointer-events-none" : ""
+          }`}
+        >
           <button
             type="button"
             onClick={() => setJudge("gordon")}
@@ -69,9 +114,7 @@ export default function Home() {
             }`}
           >
             👵 Grandma
-            <p className="text-xs mt-1 text-gray-300">
-              Simplicity over everything
-            </p>
+            <p className="text-xs mt-1 text-gray-300">Simplicity over everything</p>
           </button>
 
           <button
@@ -84,28 +127,22 @@ export default function Home() {
             }`}
           >
             📱 iPad Kid
-            <p className="text-xs mt-1 text-gray-300">
-              Fast, flashy, short attention
-            </p>
+            <p className="text-xs mt-1 text-gray-300">Fast, flashy, short attention</p>
           </button>
         </div>
 
-        {/* Roast Form */}
-        <form
-          onSubmit={handleSubmit}
-          className="flex flex-col items-center gap-4 w-full"
+        {/* Submit Button */}
+        <button
+          onClick={handleSubmit}
+          className={`bg-blue-600 text-white px-6 py-3 rounded-xl hover:bg-blue-700 transition-colors w-full text-lg font-semibold ${
+            !file || !judge || loading ? "opacity-50 cursor-not-allowed" : ""
+          }`}
+          disabled={!file || !judge || loading}
         >
-          <button
-            type="submit"
-            className={`bg-blue-600 text-white px-6 py-3 rounded-xl hover:bg-blue-700 transition-colors w-full text-lg font-semibold ${
-              loading ? "opacity-50 cursor-not-allowed" : ""
-            }`}
-            disabled={loading}
-          >
-            {loading ? "Roasting..." : "Roast my UI"}
-          </button>
-        </form>
+          {loading ? "Roasting..." : "Roast my UI"}
+        </button>
 
+        {/* Roast Result */}
         {roast && (
           <div className="mt-8 bg-gray-700 p-6 rounded-2xl shadow-inner w-full text-gray-100">
             <h2 className="text-2xl font-semibold mb-2">Roast Result:</h2>
