@@ -9,32 +9,27 @@ type Judge = "gordon" | "grandma" | "ipad_kid";
 // Fire emoji component (client-only) to avoid hydration errors
 const FireEmoji = () => {
   const [mounted, setMounted] = useState(false);
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  useEffect(() => setMounted(true), []);
   if (!mounted) return null;
   return <span className="animate-flicker">🔥</span>;
 };
 
 export default function Home() {
   const [judge, setJudge] = useState<Judge | null>(null);
-  const [file, setFile] = useState<File | null>(null);
+  const [imageUrl, setImageUrl] = useState<string>("");
   const [roast, setRoast] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if (!judge || !file) return;
+    if (!judge || !imageUrl) return;
 
     setLoading(true);
     try {
-      const formData = new FormData();
-      formData.append("judge", judge);
-      formData.append("file", file);
-
       const res = await fetch("/api/roast", {
         method: "POST",
-        body: formData,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ judge, imageUrl }),
       });
 
       const data = await res.json();
@@ -81,29 +76,22 @@ export default function Home() {
             <span className="tracking-tight">UI Roast AI</span>
             <span className="text-yellow-400 animate-pulse">🤬</span>
           </h1>
-
-        
-
-          {/* Subtitle */}
           <p className="mt-4 text-gray-300 text-lg sm:text-xl">
             Brutally roast your UI like a pro chef 🔥
           </p>
         </div>
 
-        {/* File upload */}
-        <label className="w-full mb-6 flex flex-col items-center cursor-pointer bg-white/10 hover:bg-white/20 px-6 py-5 rounded-2xl transition">
-          <span className="text-gray-300 mb-2 text-lg font-medium">Upload your screenshot</span>
-          <input
-            type="file"
-            accept="image/*"
-            onChange={(e) => setFile(e.target.files?.[0] || null)}
-            className="hidden"
-          />
-          {file && <span className="text-green-400 font-semibold mt-2">✅ {file.name} uploaded</span>}
-        </label>
+        {/* URL input */}
+        <input
+          type="url"
+          placeholder="Paste your screenshot URL here"
+          value={imageUrl}
+          onChange={(e) => setImageUrl(e.target.value)}
+          className="w-full mb-6 p-4 rounded-2xl border border-gray-400 bg-white/10 text-gray-200 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
 
         {/* Judge buttons */}
-        <div className={`grid grid-cols-1 sm:grid-cols-3 gap-5 mb-6 w-full ${!file ? "opacity-50 pointer-events-none" : ""}`}>
+        <div className={`grid grid-cols-1 sm:grid-cols-3 gap-5 mb-6 w-full ${!imageUrl ? "opacity-50 pointer-events-none" : ""}`}>
           {judges.map((j) => {
             const isSelected = judge === j.id;
             return (
@@ -127,9 +115,9 @@ export default function Home() {
         <button
           onClick={handleSubmit}
           className={`bg-blue-600 text-white px-8 py-4 rounded-2xl hover:bg-blue-700 transition-colors w-full text-xl font-bold ${
-            !file || !judge || loading ? "opacity-50 cursor-not-allowed" : ""
+            !imageUrl || !judge || loading ? "opacity-50 cursor-not-allowed" : ""
           }`}
-          disabled={!file || !judge || loading}
+          disabled={!imageUrl || !judge || loading}
         >
           {loading ? "Roasting..." : "Roast my UI"}
         </button>
@@ -141,6 +129,11 @@ export default function Home() {
             <p className="whitespace-pre-wrap text-lg leading-relaxed">{roast}</p>
           </div>
         )}
+
+        {/* Footer */}
+        <p className="mt-8 text-gray-400 text-sm text-center">
+          Powered by ChatGPT GPT-4.1 | Built with Next.js & Tailwind CSS
+        </p>
 
         {/* Animations */}
         <style jsx>{`
