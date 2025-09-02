@@ -1,10 +1,20 @@
 "use client";
 
-import { useState, FormEvent } from "react";
+import { useState, FormEvent, useEffect } from "react";
 import { FaLinkedin, FaGithub } from "react-icons/fa";
 import { SiFramer } from "react-icons/si";
 
 type Judge = "gordon" | "grandma" | "ipad_kid";
+
+// Fire emoji component (client-only) to avoid hydration errors
+const FireEmoji = () => {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+  if (!mounted) return null;
+  return <span className="animate-flicker">🔥</span>;
+};
 
 export default function Home() {
   const [judge, setJudge] = useState<Judge | null>(null);
@@ -38,25 +48,24 @@ export default function Home() {
   };
 
   const judges = [
-    { id: "gordon", label: "Gordon Ramsay", emoji: "🍳", gradient: "from-red-500 via-pink-500 to-red-600" },
-    { id: "grandma", label: "Grandma", emoji: "👵", gradient: "from-pink-400 via-purple-500 to-pink-500" },
-    { id: "ipad_kid", label: "iPad Kid", emoji: "📱", gradient: "from-yellow-400 via-orange-400 to-yellow-500" },
+    { id: "gordon", label: "Gordon Ramsay", gradient: "from-red-500 via-pink-500 to-red-600" },
+    { id: "grandma", label: "Grandma", gradient: "from-pink-400 via-purple-500 to-pink-500" },
+    { id: "ipad_kid", label: "iPad Kid", gradient: "from-yellow-400 via-orange-400 to-yellow-500" },
   ] as const;
 
   return (
     <div className="min-h-screen flex flex-col items-center bg-gradient-to-br from-gray-900 via-gray-800 to-gray-950 p-6">
-      
-      {/* Header */}
-      <header className="w-full max-w-5xl flex flex-col sm:flex-row justify-between items-center mb-10">
-        <span className="text-gray-400 text-lg mb-2 sm:mb-0">Made by <span className="text-white font-semibold">Abbi Kamak</span></span>
-        <div className="flex gap-6">
-          <a href="https://www.linkedin.com/in/abbishekkamak/" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-blue-500 transition text-2xl">
+      {/* Top header with links */}
+      <header className="w-full max-w-5xl flex justify-center sm:justify-between items-center mb-10 px-4 py-2">
+        <span className="text-white font-semibold text-lg">Made by Abbi Kamak</span>
+        <div className="flex gap-4 mt-2 sm:mt-0">
+          <a href="https://www.linkedin.com/in/abbishekkamak/" target="_blank" rel="noopener noreferrer" className="text-white hover:text-blue-500 transition-colors text-2xl">
             <FaLinkedin />
           </a>
-          <a href="https://abbikamak.framer.website/" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-purple-400 transition text-2xl">
+          <a href="https://abbikamak.framer.website/" target="_blank" rel="noopener noreferrer" className="text-white hover:text-purple-500 transition-colors text-2xl">
             <SiFramer />
           </a>
-          <a href="https://github.com/aram0057" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-gray-100 transition text-2xl">
+          <a href="https://github.com/aram0057" target="_blank" rel="noopener noreferrer" className="text-white hover:text-gray-400 transition-colors text-2xl">
             <FaGithub />
           </a>
         </div>
@@ -64,10 +73,24 @@ export default function Home() {
 
       {/* Main container */}
       <div className="w-full max-w-2xl bg-white/5 backdrop-blur-md border border-white/10 rounded-3xl shadow-2xl p-10 flex flex-col items-center">
-        <h1 className="text-5xl font-extrabold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 text-center">
-          🔥 UI Roast AI 🤬
-        </h1>
 
+        {/* Header */}
+        <div className="relative mb-8 flex flex-col items-center text-center">
+          <h1 className="text-5xl sm:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 flex items-center gap-4">
+            <FireEmoji />
+            <span className="tracking-tight">UI Roast AI</span>
+            <span className="text-yellow-400 animate-pulse">🤬</span>
+          </h1>
+
+        
+
+          {/* Subtitle */}
+          <p className="mt-4 text-gray-300 text-lg sm:text-xl">
+            Brutally roast your UI like a pro chef 🔥
+          </p>
+        </div>
+
+        {/* File upload */}
         <label className="w-full mb-6 flex flex-col items-center cursor-pointer bg-white/10 hover:bg-white/20 px-6 py-5 rounded-2xl transition">
           <span className="text-gray-300 mb-2 text-lg font-medium">Upload your screenshot</span>
           <input
@@ -79,6 +102,7 @@ export default function Home() {
           {file && <span className="text-green-400 font-semibold mt-2">✅ {file.name} uploaded</span>}
         </label>
 
+        {/* Judge buttons */}
         <div className={`grid grid-cols-1 sm:grid-cols-3 gap-5 mb-6 w-full ${!file ? "opacity-50 pointer-events-none" : ""}`}>
           {judges.map((j) => {
             const isSelected = judge === j.id;
@@ -88,24 +112,18 @@ export default function Home() {
                 type="button"
                 onClick={() => setJudge(j.id as Judge)}
                 className={`
-                  relative p-6 rounded-2xl text-white text-lg font-semibold border-2 overflow-hidden transition-all
-                  ${isSelected ? `bg-gradient-to-r ${j.gradient} shadow-[0_0_20px_4px]` : "border-gray-500 bg-gray-700 hover:bg-gray-600"}
+                  p-6 rounded-2xl text-white text-lg font-semibold border-2 transition-all
+                  ${isSelected ? `bg-gradient-to-r ${j.gradient} shadow-[0_0_25px_6px]` : "border-gray-500 bg-gray-700 hover:bg-gray-600"}
                   hover:scale-105 hover:shadow-lg duration-300
                 `}
               >
-                {/* Big semi-transparent icon */}
-                <span
-                  className="absolute text-7xl opacity-20 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none select-none"
-                >
-                  {j.emoji}
-                </span>
-                {/* Button text */}
-                <span className="relative z-10">{j.label}</span>
+                {j.label}
               </button>
             );
           })}
         </div>
 
+        {/* Roast button */}
         <button
           onClick={handleSubmit}
           className={`bg-blue-600 text-white px-8 py-4 rounded-2xl hover:bg-blue-700 transition-colors w-full text-xl font-bold ${
@@ -116,12 +134,35 @@ export default function Home() {
           {loading ? "Roasting..." : "Roast my UI"}
         </button>
 
+        {/* Roast output */}
         {roast && (
           <div className="mt-10 w-full bg-white/10 backdrop-blur-md border border-white/20 p-8 rounded-2xl shadow-inner text-gray-100">
             <h2 className="text-3xl font-semibold mb-4 text-center">Roast Result</h2>
             <p className="whitespace-pre-wrap text-lg leading-relaxed">{roast}</p>
           </div>
         )}
+
+        {/* Animations */}
+        <style jsx>{`
+          @keyframes flicker {
+            0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% { opacity: 1; }
+            20%, 22%, 24%, 55% { opacity: 0.3; }
+          }
+          .animate-flicker {
+            animation: flicker 1s infinite;
+            display: inline-block;
+          }
+          @keyframes pulse-slow {
+            0%, 100% { opacity: 0.2; transform: scale(1); }
+            50% { opacity: 0.4; transform: scale(1.05); }
+          }
+          .animate-pulse-slow {
+            animation: pulse-slow 3s infinite;
+          }
+          .animate-pulse {
+            animation: pulse 1s infinite;
+          }
+        `}</style>
       </div>
     </div>
   );
