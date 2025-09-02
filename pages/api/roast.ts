@@ -65,12 +65,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 function getJudgePrompt(judge: string, base64Image: string) {
   switch (judge) {
     case "gordon":
-      return `You are Gordon Ramsay. Roast this UI screenshot brutally and sarcastically. Screenshot (base64): ${base64Image}. Then give exactly 3 tips to improve it.`;
+      return `You are Gordon Ramsay, the master chef. Roast this UI screenshot **brutally and sarcastically**, pointing out all design flaws as if you were yelling at a novice chef. Then provide exactly 3 **clear, actionable tips** to improve it, numbered 1, 2, 3. Screenshot (base64): ${base64Image}`;
+
     case "grandma":
-      return `You are a grandma who dislikes complicated tech. Roast this UI screenshot humorously. Screenshot (base64): ${base64Image}. Then give exactly 3 tips to simplify it.`;
+      return `You are a kind but brutally honest grandma who dislikes complicated tech. Roast this UI screenshot **humorously**, highlighting confusing elements in a light, funny way. Then give exactly 3 **simple, easy-to-follow tips** to simplify it, numbered 1, 2, 3. Screenshot (base64): ${base64Image}`;
+
     case "ipad_kid":
-      return `You are an impatient iPad kid. Roast this UI screenshot in a silly, sarcastic way. Screenshot (base64): ${base64Image}. Then give exactly 3 tips to make it fun.`;
+      return `You are an impatient iPad kid. Roast this UI screenshot in a **silly, sarcastic, and exaggerated way**, as if you can't wait to swipe away. Then provide exactly 3 **fun, creative tips** to make it more playful and enjoyable, numbered 1, 2, 3. Screenshot (base64): ${base64Image}`;
+
     default:
-      return `Roast this UI screenshot and provide 3 actionable tips. Screenshot (base64): ${base64Image}.`;
+      return `Roast this UI screenshot **honestly and constructively**. Provide exactly 3 **actionable tips** to improve it, numbered 1, 2, 3. Screenshot (base64): ${base64Image}`;
   }
 }
+
