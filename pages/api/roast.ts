@@ -6,7 +6,13 @@ const client = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+// Type for API response
+type RoastResponse = { roast: string };
+
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse<RoastResponse | { error: string }>
+) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
   }
@@ -20,7 +26,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     const selectedJudge = judge || "gordon";
 
-    // Build prompt with URL instead of base64
+    // Build prompt with URL
     const prompt = getJudgePrompt(selectedJudge, imageUrl);
 
     // Call OpenAI
@@ -32,11 +38,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       ],
     });
 
-    const roastText = completion.choices[0].message?.content || "AI roast failed.";
+    // Safely access content
+    const roastText = completion.choices?.[0]?.message?.content || "AI roast failed.";
 
     return res.status(200).json({ roast: roastText });
-  } catch (error: any) {
-    console.error("OpenAI error:", error);
+  } catch (error: unknown) {
+    console.error("OpenAI error:", error instanceof Error ? error.message : error);
     return res.status(500).json({ error: "Failed to generate roast." });
   }
 }
@@ -57,6 +64,3 @@ function getJudgePrompt(judge: string, siteUrl: string) {
       return `Analyze the website at ${siteUrl}. Roast it in one concise line and then give exactly 3 actionable, expert-level tips that mention **specific elements** like font, color, spacing, layout, or imagery. Explain where and why there is a problem. Use natural bullets and emojis, human-like tone, funny but professional. No Markdown headings or artificial bolding.`;
   }
 }
-
-
-
