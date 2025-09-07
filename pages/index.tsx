@@ -91,7 +91,7 @@ export default function Home() {
         <p className="text-gray-200">
           1. Paste your website URL <br />
           2. Pick a category <br />
-          3. Get actionable UI feedback
+          3. Get actionable UI/UX feedback
         </p>
       </div>
 
@@ -100,12 +100,12 @@ export default function Home() {
         {/* Header */}
         <div className="relative mb-8 flex flex-col items-center text-center">
           <h1 className="text-4xl sm:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 flex items-center gap-4">
-            <FireEmoji />
-            <span className="tracking-tight">UX Feedback AI</span>
+           
+            <span className="tracking-tight">UI/UX Feedback AI</span>
             <span className="text-yellow-400 animate-pulse">🎨</span>
           </h1>
           <p className="mt-4 text-gray-300 text-base sm:text-xl">
-            Get actionable UI feedback in 6 categories
+            Get actionable website feeback in different categories
           </p>
         </div>
 
