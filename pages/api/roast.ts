@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import OpenAI from "openai";
 
-// Init OpenAI
+// Init OpenAI client
 const client = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
@@ -18,22 +18,22 @@ export default async function handler(
   }
 
   try {
-    const { judge, imageUrl } = req.body as { judge?: string; imageUrl?: string };
+    const { category, siteUrl } = req.body as { category?: string; siteUrl?: string };
 
-    if (!imageUrl) {
-      return res.status(400).json({ error: "Missing image URL" });
+    if (!siteUrl) {
+      return res.status(400).json({ error: "Missing site URL" });
     }
 
-    const selectedJudge = judge || "gordon";
+    const selectedCategory = category || "full";
 
-    // Build prompt with URL
-    const prompt = getJudgePrompt(selectedJudge, imageUrl);
+    // Build prompt
+    const prompt = getCategoryPrompt(selectedCategory, siteUrl);
 
     // Call OpenAI
     const completion = await client.chat.completions.create({
       model: "gpt-4o-mini",
       messages: [
-        { role: "system", content: "You are a funny roast bot for UI design." },
+        { role: "system", content: "You are a funny but expert UI/UX roast bot." },
         { role: "user", content: prompt },
       ],
     });
@@ -48,19 +48,73 @@ export default async function handler(
   }
 }
 
-// Helper: dynamic prompts per judge
-function getJudgePrompt(judge: string, siteUrl: string) {
-  switch (judge) {
-    case "gordon":
-      return `You are Gordon Ramsay, the master chef. Visit the website at ${siteUrl} (or analyze its content) and roast it brutally in one short, punchy line. Then provide exactly 3 actionable, expert-level tips about **specific elements** like colors, fonts, spacing, or layout. Mention where the problem is (e.g., "header color too dark", "font too small in buttons") and why. Use natural bullets and matching emojis. Keep it funny, professional, and human-like. No Markdown headings, no bolding.`;
+// -----------------------------
+// Helper: dynamic prompts by category (senior designer style)
+// -----------------------------
+function getCategoryPrompt(category: string, siteUrl: string) {
+  switch (category) {
+    case "colors":
+      return `Analyze the site ${siteUrl} focusing on COLORS & CONTRAST. 
+Provide exactly 3 actionable points. For each point:
+- Clearly state what works well with color/contrast.
+- Identify the exact element(s) that have issues.
+- Suggest a precise fix.
+If no issues are found, say "Colors look good." Keep feedback concise, professional, and actionable.`;
 
-    case "grandma":
-      return `You are a kind but brutally honest grandma who dislikes complicated tech. Look at the website at ${siteUrl} (or analyze it) and roast it humorously in one short, witty line. Then provide exactly 3 clear, actionable tips that refer to **specific elements** like font size, button placement, or colors. Explain why each is confusing or needs improvement. Use natural bullets with emojis, human-like tone, funny but constructive. Avoid Markdown headings or bolding.`;
+    case "typography":
+      return `Analyze ${siteUrl} focusing on TYPOGRAPHY. 
+Provide exactly 3 actionable points. For each point:
+- Highlight what works (font choice, hierarchy, readability).
+- Identify specific problems (font size, line height, hierarchy issues, etc.) with elements.
+- Suggest a clear fix.
+If typography is fine, say "Typography looks good." Keep feedback concise and professional.`;
 
-    case "ipad_kid":
-      return `You are an impatient iPad kid. Check the website at ${siteUrl} (or analyze it) and roast it in a silly, sarcastic punchy line. Then provide exactly 3 actionable tips targeting **specific elements** like colors, fonts, spacing, or images. Explain where the problem is and why it affects usability. Use natural bullets, matching emojis, human-like tone, funny but clear. No Markdown or bolding.`;
+    case "spacing":
+      return `Analyze ${siteUrl} focusing on LAYOUT & SPACING. 
+Provide exactly 3 actionable points. For each point:
+- Mention what spacing/layout decisions are good.
+- Identify specific spacing/layout issues (too tight, too loose, inconsistent grid, etc.).
+- Suggest a precise fix.
+If spacing is fine, say "Layout & spacing look good." Keep it concise and professional.`;
+
+    case "usability":
+      return `Analyze ${siteUrl} focusing on USABILITY & INTERACTION. 
+Provide exactly 3 actionable points. For each point:
+- Highlight any usable or clear elements.
+- Identify usability issues (navigation, buttons, form interactions, mobile behavior, etc.) with specifics.
+- Suggest a concrete fix.
+If usability is fine, say "Usability looks good." Keep feedback clear and actionable.`;
+
+    case "content":
+      return `Analyze ${siteUrl} focusing on CONTENT CLARITY. 
+Provide exactly 3 actionable points. For each point:
+- Mention what content works (clarity, tone, brevity).
+- Identify problems (long text blocks, unclear labels, jargon, etc.) with specific elements.
+- Suggest a clear fix.
+If content is fine, say "Content looks good." Be concise and professional.`;
+
+    case "accessibility":
+      return `Analyze ${siteUrl} focusing on ACCESSIBILITY. 
+Provide exactly 3 actionable points. For each point:
+- Note accessible elements if any.
+- Identify accessibility issues (alt text, contrast, keyboard navigation, ARIA labels, etc.) with specifics.
+- Suggest a precise fix.
+If accessibility is fine, say "Accessibility looks good." Keep feedback actionable and professional.`;
+
+    case "full":
+      return `Analyze ${siteUrl} for overall design. 
+Provide exactly 3 actionable points, each from a different category (colors, typography, spacing, usability, content, accessibility):
+- For each point, clearly state what works.
+- Identify specific issues with elements.
+- Suggest precise fixes.
+If everything looks good in a category, say "Category X looks good." Feedback must be concise, actionable, and professional.`;
 
     default:
-      return `Analyze the website at ${siteUrl}. Roast it in one concise line and then give exactly 3 actionable, expert-level tips that mention **specific elements** like font, color, spacing, layout, or imagery. Explain where and why there is a problem. Use natural bullets and emojis, human-like tone, funny but professional. No Markdown headings or artificial bolding.`;
+      return `Analyze ${siteUrl}. Provide exactly 3 clear, actionable points:
+- Highlight what works.
+- Identify specific issues (with elements).
+- Suggest precise fixes.
+If there are no issues, say "Looks good." Keep feedback professional and precise.`;
   }
 }
+
