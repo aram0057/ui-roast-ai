@@ -54,67 +54,30 @@ export default async function handler(
 function getCategoryPrompt(category: string, siteUrl: string) {
   switch (category) {
     case "colors":
-      return `Analyze the site ${siteUrl} focusing on COLORS & CONTRAST. 
-Provide exactly 3 actionable points. For each point:
-- Clearly state what works well with color/contrast.
-- Identify the exact element(s) that have issues.
-- Suggest a precise fix.
-If no issues are found, say "Colors look good." Keep feedback concise, professional, and actionable.`;
+      return `Review ${siteUrl} for colors and contrast. Give 3 bullets: note what works, highlight an issue with an example, and suggest a fix (e.g., CTA button is too light—make darker). Keep under 256 characters. Do not use Markdown.`;
 
     case "typography":
-      return `Analyze ${siteUrl} focusing on TYPOGRAPHY. 
-Provide exactly 3 actionable points. For each point:
-- Highlight what works (font choice, hierarchy, readability).
-- Identify specific problems (font size, line height, hierarchy issues, etc.) with elements.
-- Suggest a clear fix.
-If typography is fine, say "Typography looks good." Keep feedback concise and professional.`;
+      return `Review ${siteUrl} for typography. Give 3 bullets: note what works, highlight an issue with an example, and suggest a fix (e.g., body text too small—increase size). Keep under 256 characters. Do not use Markdown.`;
 
     case "spacing":
-      return `Analyze ${siteUrl} focusing on LAYOUT & SPACING. 
-Provide exactly 3 actionable points. For each point:
-- Mention what spacing/layout decisions are good.
-- Identify specific spacing/layout issues (too tight, too loose, inconsistent grid, etc.).
-- Suggest a precise fix.
-If spacing is fine, say "Layout & spacing look good." Keep it concise and professional.`;
+      return `Review ${siteUrl} for layout and spacing. Give 3 bullets: note what works, highlight an issue with an example, and suggest a fix (e.g., sections too close—add margin). Keep under 256 characters. Do not use Markdown.`;
 
     case "usability":
-      return `Analyze ${siteUrl} focusing on USABILITY & INTERACTION. 
-Provide exactly 3 actionable points. For each point:
-- Highlight any usable or clear elements.
-- Identify usability issues (navigation, buttons, form interactions, mobile behavior, etc.) with specifics.
-- Suggest a concrete fix.
-If usability is fine, say "Usability looks good." Keep feedback clear and actionable.`;
+      return `Review ${siteUrl} for usability and interaction. Give 3 bullets: note what works, highlight an issue with an example, and suggest a fix (e.g., button unclear—add label). Keep under 256 characters. Do not use Markdown.`;
 
     case "content":
-      return `Analyze ${siteUrl} focusing on CONTENT CLARITY. 
-Provide exactly 3 actionable points. For each point:
-- Mention what content works (clarity, tone, brevity).
-- Identify problems (long text blocks, unclear labels, jargon, etc.) with specific elements.
-- Suggest a clear fix.
-If content is fine, say "Content looks good." Be concise and professional.`;
+      return `Review ${siteUrl} for content clarity. Give 3 bullets: note what works, highlight an issue with an example, and suggest a fix (e.g., headline vague—make concise). Keep under 256 characters. Do not use Markdown.`;
 
     case "accessibility":
-      return `Analyze ${siteUrl} focusing on ACCESSIBILITY. 
-Provide exactly 3 actionable points. For each point:
-- Note accessible elements if any.
-- Identify accessibility issues (alt text, contrast, keyboard navigation, ARIA labels, etc.) with specifics.
-- Suggest a precise fix.
-If accessibility is fine, say "Accessibility looks good." Keep feedback actionable and professional.`;
+      return `Review ${siteUrl} for accessibility. Give 3 bullets: note what works, highlight an issue with an example, and suggest a fix (e.g., poor contrast—adjust colors). Keep under 256 characters. Do not use Markdown.`;
 
     case "full":
-      return `Analyze ${siteUrl} for overall design. 
-Provide exactly 3 actionable points, each from a different category (colors, typography, spacing, usability, content, accessibility):
-- For each point, clearly state what works.
-- Identify specific issues with elements.
-- Suggest precise fixes.
-If everything looks good in a category, say "Category X looks good." Feedback must be concise, actionable, and professional.`;
+  return `Review ${siteUrl} overall. Give 6 bullets, one for each area: Colors, Typography, Spacing, Usability, Content, Accessibility. 
+Each bullet should: note what works, highlight an issue with an example, and suggest a fix. Keep under 500 characters total. Do not use Markdown.`;
+
 
     default:
-      return `Analyze ${siteUrl}. Provide exactly 3 clear, actionable points:
-- Highlight what works.
-- Identify specific issues (with elements).
-- Suggest precise fixes.
-If there are no issues, say "Looks good." Keep feedback professional and precise.`;
+      return `Review ${siteUrl}. Give 3 bullets: note what works, highlight an issue with an example, and suggest a fix. Keep under 256 characters. Do not use Markdown.`;
   }
 }
 
